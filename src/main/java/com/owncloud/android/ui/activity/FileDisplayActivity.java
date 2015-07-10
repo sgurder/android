@@ -129,7 +129,6 @@ import com.owncloud.android.utils.ErrorMessageAdapter;
 import com.owncloud.android.utils.FileSortOrder;
 import com.owncloud.android.utils.MimeTypeUtil;
 import com.owncloud.android.utils.PermissionUtil;
-import com.owncloud.android.widgets.ShortcutsWidget;
 import com.owncloud.android.utils.PushUtils;
 import com.owncloud.android.utils.ThemeUtils;
 
@@ -212,6 +211,7 @@ public class FileDisplayActivity extends HookActivity
     private SearchView searchView;
     private boolean mUploadFromWidget = false;
     private boolean mNewFromWidget = false;
+    private boolean mRefreshFromWidget = false;
 
     
     @Override
