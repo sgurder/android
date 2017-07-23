@@ -216,7 +216,6 @@ public class FileDisplayActivity extends HookActivity
     private SearchView searchView;
     private boolean mUploadFromWidget = false;
     private boolean mNewFromWidget = false;
-    private boolean mRefreshFromWidget = false;
 
     
     @Override
