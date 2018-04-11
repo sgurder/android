@@ -953,23 +953,10 @@ public class FileDisplayActivity extends HookActivity
 
             requestUploadOfContentFromApps(data, resultCode);
 
-        } else if (requestCode == REQUEST_CODE__SELECT_FILES_FROM_FILE_SYSTEM &&
-                (resultCode == RESULT_OK ||
-                        resultCode == UploadFilesActivity.RESULT_OK_AND_MOVE ||
-                        resultCode == UploadFilesActivity.RESULT_OK_AND_DO_NOTHING ||
-                        resultCode == UploadFilesActivity.RESULT_OK_AND_DELETE)) {
-
-            requestUploadOfFilesFromFileSystem(data, resultCode);
-
         } else if (requestCode == REQUEST_CODE__MOVE_FILES && resultCode == RESULT_OK) {
             final Intent fData = data;
             getHandler().postDelayed(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            requestMoveOperation(fData);
-                        }
-                    },
+                    () -> requestMoveOperation(fData),
                     DELAY_TO_REQUEST_OPERATIONS_LATER
             );
 
@@ -977,12 +964,7 @@ public class FileDisplayActivity extends HookActivity
 
             final Intent fData = data;
             getHandler().postDelayed(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            requestCopyOperation(fData);
-                        }
-                    },
+                    () -> requestCopyOperation(fData),
                     DELAY_TO_REQUEST_OPERATIONS_LATER
             );
 
