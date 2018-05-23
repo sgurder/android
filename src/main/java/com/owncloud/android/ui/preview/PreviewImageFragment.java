@@ -176,7 +176,7 @@ public class PreviewImageFragment extends FileFragment {
 
         view.setOnClickListener(v -> togglePreviewImageFullScreen());
 
-        mImageView.setOnClickListener(v -> togglePreviewImageFullScreen());
+        mImageView.setOnPhotoTapListener((view1, x, y) -> togglePreviewImageFullScreen());
 
         mMultiView = view.findViewById(R.id.multi_view);
 
@@ -386,6 +386,10 @@ public class PreviewImageFragment extends FileFragment {
 
     private void seeDetails() {
         mContainerActivity.showDetails(getFile());
+    }
+
+    private void downloadFile() {
+        ((PreviewImageActivity) getActivity()).requestForDownload(getFile());
     }
 
     @SuppressFBWarnings("Dm")
@@ -664,9 +668,7 @@ public class PreviewImageFragment extends FileFragment {
         try {
             if (getActivity() != null) {
                 Snackbar.make(mMultiView, R.string.resized_image_not_possible_download, Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.common_yes, v ->
-                                ((PreviewImageActivity) getActivity())
-                                        .requestForDownload(getFile())).show();
+                        .setAction(R.string.common_yes, v -> downloadFile()).show();
             } else {
                 Snackbar.make(mMultiView, R.string.resized_image_not_possible, Snackbar.LENGTH_INDEFINITE).show();
             }
