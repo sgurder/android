@@ -275,7 +275,7 @@ public class UserInfoActivity extends FileActivity {
                 && userInfo.getTwitter() == null && userInfo.getWebsite() == null) {
 
             setErrorMessageForMultiList(getString(R.string.userinfo_no_info_headline),
-                    getString(R.string.userinfo_no_info_text), R.drawable.ic_user);
+                    getString(R.string.userinfo_no_info_text), R.drawable.user);
         } else {
             emptyContentContainer.setVisibility(View.GONE);
             userInfoView.setVisibility(View.VISIBLE);
@@ -487,8 +487,8 @@ public class UserInfoActivity extends FileActivity {
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             View view = inflater.inflate(R.layout.user_info_details_table_item, parent, false);
-            ViewHolder holder = new ViewHolder(view);
-            return holder;
+
+            return new ViewHolder(view);
         }
 
         @Override
