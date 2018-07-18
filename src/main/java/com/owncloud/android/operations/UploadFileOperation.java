@@ -1340,7 +1340,7 @@ public class UploadFileOperation extends SyncOperation {
         FileDataStorageManager.triggerMediaScan(file.getStoragePath());
 
         // generate new Thumbnail
-        DisplayUtils.generateThumbnail(file, getContext());
+        DisplayUtils.generateThumbnail(file, mOriginalStoragePath, getContext());
     }
 
     private void updateOCFile(OCFile file, RemoteFile remoteFile) {
