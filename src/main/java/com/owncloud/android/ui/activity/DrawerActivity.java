@@ -588,7 +588,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
     /**
      * updates the account list in the drawer.
      */
-    public void updateAccountList() {
+    public void updateAccountList() { // TODO glide this is done twice on startup
         Account[] accounts = AccountManager.get(this).getAccountsByType(MainApp.getAccountType(this));
 
         ArrayList<Account> persistingAccounts = new ArrayList<>();
@@ -611,9 +611,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 // activate second/end account avatar
                 if (mAvatars[1] != null) {
                     ImageView accountEndView = (ImageView) findNavigationViewChildById(R.id.drawer_account_end);
-
-                    DisplayUtils.setAvatar(mAvatars[1], this, mOtherAccountAvatarRadiusDimension, getResources(),
-                            getStorageManager(), accountEndView, this, accountEndView);
+                    DisplayUtils.setAvatar(mAvatars[1], this, accountEndView, mOtherAccountAvatarRadiusDimension);
                     mAccountEndAccountAvatar.setVisibility(View.VISIBLE);
                 } else {
                     mAccountEndAccountAvatar.setVisibility(View.GONE);
@@ -622,10 +620,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                 // activate third/middle account avatar
                 if (mAvatars[2] != null) {
                     ImageView accountMiddleView = (ImageView) findNavigationViewChildById(R.id.drawer_account_middle);
-//                    accountMiddleView.setTag(mAvatars[2].name);
-
-                    DisplayUtils.setAvatar(mAvatars[2], this, mOtherAccountAvatarRadiusDimension, getResources(),
-                            getStorageManager(), accountMiddleView, this, accountMiddleView);
+                    DisplayUtils.setAvatar(mAvatars[2], this, accountMiddleView, mOtherAccountAvatarRadiusDimension);
                     mAccountMiddleAccountAvatar.setVisibility(View.VISIBLE);
                 } else {
                     mAccountMiddleAccountAvatar.setVisibility(View.GONE);
@@ -666,9 +661,8 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                             accountMenuItem.setIcon(resource);
                         }
                     };
-                    
-                    DisplayUtils.setAvatar(account, this, mMenuAccountAvatarRadiusDimension, getResources(),
-                            getStorageManager(), accountMenuItem, this, menuTarget);
+
+                    DisplayUtils.setAvatar(account, this, menuTarget);
                 }
             } catch (Exception e) {
                 Log_OC.e(TAG, "Error calculating RGB value for account menu item.", e);
@@ -737,11 +731,9 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
             }
 
             ImageView currentAccountView = (ImageView) findNavigationViewChildById(R.id.drawer_current_account);
-//            currentAccountView.setTag(account.name);
 
             // TODO glide
-            DisplayUtils.setAvatar(account, this, mCurrentAccountAvatarRadiusDimension, getResources(),
-                    getStorageManager(), currentAccountView, this, currentAccountView);
+            DisplayUtils.setAvatar(account, this, currentAccountView, mCurrentAccountAvatarRadiusDimension);
 
             // check and show quota info if available
             getAndDisplayUserQuota();
