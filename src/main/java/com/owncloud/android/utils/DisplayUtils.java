@@ -60,6 +60,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
@@ -483,8 +484,9 @@ public class DisplayUtils {
      */
     public static void setAvatar(@NonNull Account account, @NonNull String userId, Context context, ImageView view,
                                  float radius) {
+        view.setContentDescription(account.name);
+        
         AsyncTask task = new AsyncTask<Object, Void, InputStream>() {
-            GlideContainer container;
 
             @Override
             protected InputStream doInBackground(Object[] objects) {
@@ -525,74 +527,37 @@ public class DisplayUtils {
                             // new avatar
                             inputStream = get.getResponseBodyAsStream();
 
-                            String newETag = null;
                             if (get.getResponseHeader(ETAG) != null) {
-                                newETag = get.getResponseHeader(ETAG).getValue().replace("\"", "");
+                                String newETag = get.getResponseHeader(ETAG).getValue().replace("\"", "");
                                 Log_OC.d(TAG, "glide: new etag: " + newETag);
                                 arbitraryDataProvider.storeOrUpdateKeyValue(accountName, GlideKey.AVATAR, newETag);
-                            }
-                            // Add avatar to cache
-                            if (inputStream != null && !TextUtils.isEmpty(newETag)) {
-                                // TODO glide
-                                // avatar = handlePNG(avatar, px, px);
-                                String newImageKey = "a_" + userId + "_" + serverName + "_" + newETag;
-
-                                // TODO GLIDE
-                                // addBitmapToCache(newImageKey, avatar);
-                            } else {
-                                // TODO glide 
-                                // return TextDrawable.createAvatar(account.name, mAvatarRadius);
                             }
                             break;
 
                         case HttpStatus.SC_NOT_MODIFIED:
-                            // old avatar
-                            // TODO glide
-                            // avatar = getBitmapFromDiskCache(avatarKey);
-                            client.exhaustResponse(get.getResponseBodyAsStream());
-                            break;
-
                         default:
-                            // everything else
                             client.exhaustResponse(get.getResponseBodyAsStream());
                             break;
 
                     }
                 } catch (Exception e) {
-                    try {
-                        // TODO glide 
-//                        return TextDrawable.createAvatar(mAccount.name, mAvatarRadius);
-                    } catch (Exception e1) {
-                        Log_OC.e(TAG, "Error generating fallback avatar");
-                    }
-                } finally {
-                    if (get != null) {
-                        //  get.releaseConnection(); // TODO glide this must not be released?
-                    }
+                    // do nothing, fallback in glide
+                    //  get.releaseConnection(); // TODO glide this must not be released?
                 }
-
-
-//                int px = getAvatarDimension(context);
-//                container = new GlideContainer();
-//                container.url = client.getBaseUri() + "/index.php/avatar/" + Uri.encode(userId) + "/" + px;
-//                container.client = client;
-//                container.key = GlideKey.avatar(account, userId, context);
 
                 return inputStream;
             }
 
             @Override
             protected void onPostExecute(InputStream inputStream) {
-                int placeholder = R.drawable.ic_user;
+                Drawable placeholder = context.getResources().getDrawable(R.drawable.ic_user);
 
-                Drawable failback = null;
+                Drawable fallback;
                 try {
-                    // TODO every time created?
-                    failback = TextDrawable.createAvatar(account.name, radius);
+                    fallback = TextDrawable.createAvatar(account.name, radius);
                 } catch (NoSuchAlgorithmException e) {
-
+                    fallback = placeholder;
                 }
-
 
                 try {
                     GlideApp.with(context)
@@ -600,11 +565,11 @@ public class DisplayUtils {
                             .load(new GlideAvatar(GlideKey.avatar(account, userId, context), inputStream))
                             .apply(RequestOptions.circleCropTransform())
                             .placeholder(placeholder)
-                            .error(failback)
+                            .error(fallback)
                             .onlyRetrieveFromCache(inputStream == null)
                             .into(view);
                 } catch (Exception e) {
-                    // TODO glide
+                    // context may be null
                 }
             }
         };
@@ -708,15 +673,13 @@ public class DisplayUtils {
 
     public static Bitmap downloadImageSynchronous(Context context, String imageUrl) {
         try {
-            // TODO glide
-            return null;
-//            return Glide.with(context)
-//                    .load(imageUrl)
-//                    .asBitmap()
-//                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                    .skipMemoryCache(true)
-//                    .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-//                    .get();
+            return GlideApp.with(context)
+                    .asBitmap()
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .into(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                    .get();
         } catch (Exception e) {
             Log_OC.e(TAG, "Could not download image " + imageUrl);
             return null;
