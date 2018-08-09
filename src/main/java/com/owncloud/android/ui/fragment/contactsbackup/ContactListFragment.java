@@ -62,16 +62,13 @@ import android.widget.Toast;
 
 import com.evernote.android.job.JobRequest;
 import com.evernote.android.job.util.support.PersistableBundleCompat;
-import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.files.services.FileDownloader;
 import com.owncloud.android.jobs.ContactsImportJob;
-import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
-import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.ui.TextDrawable;
 import com.owncloud.android.ui.activity.ContactsPreferenceActivity;
@@ -170,15 +167,7 @@ public class ContactListFragment extends FileFragment {
         View view = inflater.inflate(R.layout.contactlist_fragment, container, false);
         ButterKnife.bind(this, view);
 
-        OwnCloudClient client;
-        try {
-            Account currentAccount = AccountUtils.getCurrentOwnCloudAccount(MainApp.getAppContext());
-            OwnCloudAccount ocAccount = new OwnCloudAccount(currentAccount, getContext());
-            client = OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, getContext());
-        } catch (Exception e) {
-            // TODO glide better
-            client = null;
-        }
+        OwnCloudClient client = AccountUtils.getClientForCurrentAccount(requireContext());
 
         setHasOptionsMenu(true);
 

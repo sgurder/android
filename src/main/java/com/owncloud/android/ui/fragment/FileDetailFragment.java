@@ -26,6 +26,8 @@ import android.accounts.Account;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,6 +45,9 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -65,6 +70,8 @@ import com.owncloud.android.ui.dialog.RenameFileDialogFragment;
 import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.MimeTypeUtil;
 import com.owncloud.android.utils.ThemeUtils;
+import com.owncloud.android.utils.glide.GlideApp;
+import com.owncloud.android.utils.glide.GlideContainer;
 import com.owncloud.android.utils.glide.GlideKey;
 
 import java.lang.ref.WeakReference;
@@ -562,67 +569,82 @@ public class FileDetailFragment extends FileFragment implements OnClickListener 
         Bitmap resizedImage;
 
         if (MimeTypeUtil.isImage(file) && activity != null && activity.getPreviewImageView() != null) {
-            OwnCloudClient mClient = null;
             try {
                 Account account = AccountUtils.getCurrentOwnCloudAccount(getContext());
                 OwnCloudAccount ocAccount = new OwnCloudAccount(account, MainApp.getAppContext());
 
-                mClient = OwnCloudClientManagerFactory.getDefaultSingleton().
+                OwnCloudClient mClient = OwnCloudClientManagerFactory.getDefaultSingleton().
                         getClientFor(ocAccount, MainApp.getAppContext());
+
+                int thumbnailW = DisplayUtils.getThumbnailDimension();
+                int thumbnailH = DisplayUtils.getThumbnailDimension();
+
+                activatePreviewImage();
+                previewLoaded = true;
+
+                // Thumbnail
+                GlideContainer container = new GlideContainer();
+                int placeholder = MimeTypeUtil.isVideo(getFile()) ? R.drawable.file_movie : R.drawable.file_image;
+
+                container.url = mClient.getBaseUri() + "/index.php/apps/files/api/v1/thumbnail/" +
+                        thumbnailW + "/" + thumbnailH + Uri.encode(getFile().getRemotePath(), "/");
+                container.client = mClient;
+                container.key = GlideKey.serverThumbnail(getFile());
+
+                // resized image
+                GlideContainer containerResizedImage = new GlideContainer();
+
+                Point p = DisplayUtils.getScreenDimension();
+                int pxW = p.x;
+                int pxH = p.y;
+
+                containerResizedImage.url = mClient.getBaseUri() + "/index.php/core/preview.png?file="
+                        + URLEncoder.encode(getFile().getRemotePath())
+                        + "&x=" + pxW + "&y=" + pxH + "&a=1&mode=cover&forceIcon=0";
+                containerResizedImage.key = GlideKey.resizedImage(getFile());
+                containerResizedImage.client = mClient;
+
+                GlideApp.with(requireContext())
+                        .asBitmap()
+                        .load(container)
+                        .placeholder(placeholder)
+                        .priority(Priority.IMMEDIATE)
+                        .onlyRetrieveFromCache(true)
+                        .into(new SimpleTarget<Bitmap>() {
+                                  @Override
+                                  public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                      activity.setPreviewImageDrawable(activity.getResources()
+                                              .getDrawable(placeholder));
+                                      loadResizedImage(containerResizedImage);
+                                  }
+
+                                  @Override
+                                  public void onResourceReady(@NonNull Bitmap resource,
+                                                              @Nullable Transition<? super Bitmap> transition) {
+                                      activity.setPreviewImageBitmap(resource);
+                                      loadResizedImage(containerResizedImage);
+                                  }
+                              }
+                        );
             } catch (Exception e) {
-                // TODO glide
+                Log_OC.e(TAG, e.getMessage());
             }
-            // TODO glide
-            Point p = DisplayUtils.getScreenDimension();
-            int pxW = p.x;
-            int pxH = p.y;
+        }
+    }
 
-            String uri = mClient.getBaseUri() + "/index.php/core/preview.png?file="
-                    + URLEncoder.encode(getFile().getRemotePath())
-                    + "&x=" + pxW + "&y=" + pxH + "&a=1&mode=cover&forceIcon=0";
-            DisplayUtils.downloadImage(uri, R.drawable.file_image, R.drawable.file_image, activity.getPreviewImageView(), mClient,
-                    GlideKey.resizedImage(getFile()), getContext());
-            activatePreviewImage();
-            previewLoaded = true;
-
-            // if no resized image, show thumbnail while loading resized image
-//                Bitmap thumbnail = ThumbnailsCacheManager.getBitmapFromDiskCache(
-//                        String.valueOf(ThumbnailsCacheManager.PREFIX_THUMBNAIL + getFile().getRemoteId()));
-
-//                if (thumbnail != null) {
-//                    activity.setPreviewImageBitmap(thumbnail);
-//                } else {
-            // TODO glide
-                    // thumbnail = ThumbnailsCacheManager.mDefaultImg;
-//                }
-
-                // generate new resized image
-            // TODO glide replace
-//                if (ThumbnailsCacheManager.cancelPotentialThumbnailWork(getFile(), activity.getPreviewImageView()) &&
-//                        mContainerActivity.getStorageManager() != null) {
-//                    final ThumbnailsCacheManager.ResizedImageGenerationTask task =
-//                            new ThumbnailsCacheManager.ResizedImageGenerationTask(FileDetailFragment.this,
-//                                    activity.getPreviewImageView(),
-//                                    mContainerActivity.getStorageManager(),
-//                                    mContainerActivity.getStorageManager().getAccount());
-//
-//                    if (resizedImage == null) {
-//                        resizedImage = thumbnail;
-//                    }
-//
-//                    final ThumbnailsCacheManager.AsyncResizedImageDrawable asyncDrawable =
-//                            new ThumbnailsCacheManager.AsyncResizedImageDrawable(
-//                                    MainApp.getAppContext().getResources(),
-//                                    resizedImage,
-//                                    task
-//                            );
-//
-//                    activity.setPreviewImageDrawable(asyncDrawable);
-//                    activatePreviewImage();
-//                    previewLoaded = true;
-//                    task.execute(getFile());
-//                }
-            }
+    private void loadResizedImage(GlideContainer containerResizedImage) {
+        GlideApp.with(requireContext())
+                .asBitmap()
+                .load(containerResizedImage)
+                .priority(Priority.IMMEDIATE)
+                .into(new SimpleTarget<Bitmap>() {
+                          @Override
+                          public void onResourceReady(@NonNull Bitmap resource,
+                                                      @Nullable Transition<? super Bitmap> transition) {
+                              activity.setPreviewImageBitmap(resource);
+                          }
+                      }
+                );
     }
 
     /**

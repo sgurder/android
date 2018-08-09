@@ -27,7 +27,7 @@ public class SvgSoftwareLayerSetter<PictureDrawable> implements RequestListener<
             ImageView view = ((ImageViewTarget<?>) target).getView();
             view.setLayerType(ImageView.LAYER_TYPE_NONE, null);
         } catch (Exception e1) {
-            // TODO glide
+            // ignore
         }
 
         return false;
@@ -40,7 +40,7 @@ public class SvgSoftwareLayerSetter<PictureDrawable> implements RequestListener<
             ImageView view = ((ImageViewTarget<?>) target).getView();
             view.setLayerType(ImageView.LAYER_TYPE_SOFTWARE, null);
         } catch (Exception e) {
-            // TODO glide
+            // ignore
         }
 
         return false;
