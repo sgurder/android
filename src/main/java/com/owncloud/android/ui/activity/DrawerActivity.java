@@ -38,7 +38,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -56,8 +55,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
@@ -92,8 +89,6 @@ import com.owncloud.android.utils.DisplayUtils;
 import com.owncloud.android.utils.DrawerMenuUtil;
 import com.owncloud.android.utils.FilesSyncHelper;
 import com.owncloud.android.utils.ThemeUtils;
-import com.owncloud.android.utils.glide.GlideKey;
-import com.owncloud.android.utils.svg.MenuSimpleTarget;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -654,15 +649,16 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                             account.name)
                             .setIcon(TextDrawable.createAvatar(account.name, mMenuAccountAvatarRadiusDimension));
 
-                    SimpleTarget<Drawable> menuTarget = new SimpleTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource,
-                                                    @Nullable Transition<? super Drawable> transition) {
-                            accountMenuItem.setIcon(resource);
-                        }
-                    };
-
-                    DisplayUtils.setAvatar(account, this, menuTarget);
+                    // TODO glide
+//                    SimpleTarget<Drawable> menuTarget = new SimpleTarget<Drawable>() {
+//                        @Override
+//                        public void onResourceReady(@NonNull Drawable resource,
+//                                                    @Nullable Transition<? super Drawable> transition) {
+//                            accountMenuItem.setIcon(resource);
+//                        }
+//                    };
+//
+//                    DisplayUtils.setAvatar(account, this, menuTarget);
                 }
             } catch (Exception e) {
                 Log_OC.e(TAG, "Error calculating RGB value for account menu item.", e);
@@ -837,40 +833,36 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                     mQuotaTextLink.setText(firstQuota.name);
                     mQuotaTextLink.setClickable(true);
                     mQuotaTextLink.setVisibility(View.VISIBLE);
-                    mQuotaTextLink.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent externalWebViewIntent = new Intent(getApplicationContext(), ExternalSiteWebView.class);
-                            externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_TITLE, firstQuota.name);
-                            externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_URL, firstQuota.url);
-                            externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_SHOW_SIDEBAR, true);
-                            externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_MENU_ITEM_ID, -1);
-                            startActivity(externalWebViewIntent);
-                        }
+                    mQuotaTextLink.setOnClickListener(v -> {
+                        Intent externalWebViewIntent = new Intent(getApplicationContext(), ExternalSiteWebView.class);
+                        externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_TITLE, firstQuota.name);
+                        externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_URL, firstQuota.url);
+                        externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_SHOW_SIDEBAR, true);
+                        externalWebViewIntent.putExtra(ExternalSiteWebView.EXTRA_MENU_ITEM_ID, -1);
+                        startActivity(externalWebViewIntent);
                     });
 
-
-                    SimpleTarget<Drawable> target = new SimpleTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource,
-                                                    @Nullable Transition<? super Drawable> transition) {
-                            Drawable test = resource.getCurrent();
-                            test.setBounds(0, 0, size, size);
-                            mQuotaTextLink.setCompoundDrawablesWithIntrinsicBounds(test, null, null, null);
-                        }
-
-                        @Override
-                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            Drawable test = errorDrawable.getCurrent();
-                            test.setBounds(0, 0, size, size);
-
-                            mQuotaTextLink.setCompoundDrawablesWithIntrinsicBounds(test, null, null, null);
-                        }
-                    };
-
+                    // TODO glide
+//                    SimpleTarget<Drawable> target = new SimpleTarget<Drawable>() {
+//                        @Override
+//                        public void onResourceReady(@NonNull Drawable resource,
+//                                                    @Nullable Transition<? super Drawable> transition) {
+//                            Drawable test = resource.getCurrent();
+//                            test.setBounds(0, 0, size, size);
+//                            mQuotaTextLink.setCompoundDrawablesWithIntrinsicBounds(test, null, null, null);
+//                        }
+//
+//                        @Override
+//                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+//                            Drawable test = errorDrawable.getCurrent();
+//                            test.setBounds(0, 0, size, size);
+//
+//                            mQuotaTextLink.setCompoundDrawablesWithIntrinsicBounds(test, null, null, null);
+//                        }
+//                    };
+//
 //                    DisplayUtils.downloadIcon(this, firstQuota.iconUrl, target, R.drawable.ic_link_grey,
 //                            R.drawable.ic_link_grey);
-
                 } else {
                     mQuotaTextLink.setVisibility(View.GONE);
                 }
@@ -1001,20 +993,20 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                         MENU_ITEM_EXTERNAL_LINK + link.id, MENU_ORDER_EXTERNAL_LINKS, link.name)
                         .setCheckable(true).getItemId();
 
-                MenuSimpleTarget<Drawable> target = new MenuSimpleTarget<Drawable>(id) {
-                    @Override
-                    public void onResourceReady(@NonNull Drawable resource,
-                                                @Nullable Transition<? super Drawable> transition) {
-                        setExternalLinkIcon(getIdMenuItem(), resource, greyColor);
-                    }
-
-                    @Override
-                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        setExternalLinkIcon(getIdMenuItem(), errorDrawable, greyColor);
-                    }
-                };
-
-                DisplayUtils.downloadIcon(this, link.iconUrl, target, R.drawable.ic_link_grey, R.drawable.ic_link_grey);
+                // todo glide
+//                MenuSimpleTarget<Drawable> target = new MenuSimpleTarget<Drawable>(id) {
+//                    @Override
+//                    public void onResourceReady(Drawable resource, GlideAnimation<? super Drawable> glideAnimation) {
+//                        setExternalLinkIcon(getIdMenuItem(), resource, greyColor);
+//                    }
+//
+//                    @Override
+//                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
+//                        setExternalLinkIcon(getIdMenuItem(), errorDrawable, greyColor);
+//                    }
+//                };
+//
+//                DisplayUtils.downloadIcon(this, link.iconUrl, target, R.drawable.ic_link_grey, R.drawable.ic_link_grey);
             }
 
             setDrawerMenuItemChecked(mCheckedMenuItem);
@@ -1058,22 +1050,22 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                     // use url 
                     if (URLUtil.isValidUrl(background) || background.isEmpty()) {
                         // background image
-                        SimpleTarget<Drawable> target = new SimpleTarget<Drawable>() {
-                            @Override
-                            public void onResourceReady(@NonNull Drawable resource,
-                                                        @Nullable Transition<? super Drawable> transition) {
-                                Drawable[] drawables = {new ColorDrawable(primaryColor), resource};
-                                LayerDrawable layerDrawable = new LayerDrawable(drawables);
-                                setNavigationHeaderBackground(layerDrawable, navigationHeader);
-                            }
-
-                            @Override
-                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                Drawable[] drawables = {new ColorDrawable(primaryColor), errorDrawable};
-                                LayerDrawable layerDrawable = new LayerDrawable(drawables);
-                                setNavigationHeaderBackground(layerDrawable, navigationHeader);
-                            }
-                        };
+                        // todo glide
+//                        SimpleTarget<Drawable> target = new SimpleTarget<Drawable>() {
+//                            @Override
+//                            public void onResourceReady(Drawable resource, GlideAnimation<? super Drawable> glideAnimation) {
+//                                Drawable[] drawables = {new ColorDrawable(primaryColor), resource};
+//                                LayerDrawable layerDrawable = new LayerDrawable(drawables);
+//                                setNavigationHeaderBackground(layerDrawable, navigationHeader);
+//                            }
+//
+//                            @Override
+//                            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+//                                Drawable[] drawables = {new ColorDrawable(primaryColor), errorDrawable};
+//                                LayerDrawable layerDrawable = new LayerDrawable(drawables);
+//                                setNavigationHeaderBackground(layerDrawable, navigationHeader);
+//                            }
+//                        };
 
                         int backgroundResource;
                         OwnCloudVersion ownCloudVersion = AccountUtils.getServerVersion(getAccount());
@@ -1083,8 +1075,9 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                             backgroundResource = R.drawable.background;
                         }
 
-                        DisplayUtils.downloadImage(background, backgroundResource, backgroundResource, target,
-                                GlideKey.url(background), this);
+                        // todo glide
+//                        DisplayUtils.downloadImage(background, backgroundResource, backgroundResource, target,
+//                                GlideKey.url(background), this);
                     } else {
                         // plain color
                         setNavigationHeaderBackground(new ColorDrawable(primaryColor), navigationHeader);
