@@ -304,7 +304,7 @@ public class PreviewImageFragment extends FileFragment {
     }
 
     private void loadResizedImage(GlideContainer containerResizedImage) {
-        GlideApp.with(getContext())
+        GlideApp.with(requireContext())
                 .asBitmap()
                 .load(containerResizedImage)
                 .priority(Priority.IMMEDIATE)

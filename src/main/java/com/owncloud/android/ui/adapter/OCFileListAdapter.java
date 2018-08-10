@@ -363,6 +363,11 @@ public class OCFileListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     mContext));
         } else {
             if ((MimeTypeUtil.isImage(file) || MimeTypeUtil.isVideo(file)) && file.getRemoteId() != null) {
+
+                if (client == null) {
+                    client = AccountUtils.getClientForCurrentAccount(mContext);
+                }
+                
                 DisplayUtils.downloadThumbnail(file, thumbnailView, client, mContext);
 
                 if ("image/png".equalsIgnoreCase(file.getMimeType())) {

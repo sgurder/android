@@ -645,7 +645,6 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
         for (Account account: accounts) {
             try {
                 // show all accounts except the currently active one and those pending for removal
-
                 if (!getAccount().name.equals(account.name)) {
                     MenuItem accountMenuItem = mNavigationView.getMenu().add(
                             R.id.drawer_menu_accounts,
@@ -662,7 +661,7 @@ public abstract class DrawerActivity extends ToolbarActivity implements DisplayU
                         }
                     };
 
-                    DisplayUtils.setAvatar(account, this, menuTarget);
+                    DisplayUtils.setAvatar(account, this, menuTarget, mMenuAccountAvatarRadiusDimension);
                 }
             } catch (Exception e) {
                 Log_OC.e(TAG, "Error calculating RGB value for account menu item.", e);

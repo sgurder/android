@@ -49,8 +49,6 @@ public class HttpStreamGlideContainerFetcher implements DataFetcher<InputStream>
     public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
         Log_OC.d(TAG, "load thumbnail for: " + container.url);
 
-        // TODO glide centralize all urls
-
         GetMethod get;
         try {
             get = new GetMethod(container.url);

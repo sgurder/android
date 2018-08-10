@@ -298,7 +298,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
         mOnlyFoldersClickable = (args != null) && args.getBoolean(ARG_ONLY_FOLDERS_CLICKABLE, false);
         boolean hideItemOptions = (args != null) && args.getBoolean(ARG_HIDE_ITEM_OPTIONS, false);
 
-        client = AccountUtils.getClientForCurrentAccount(getContext());
+        // client = AccountUtils.getClientForCurrentAccount(getContext());
 
         mAdapter = new OCFileListAdapter(getActivity(), client, mContainerActivity, this, hideItemOptions,
                 isGridViewPreferred(mFile));

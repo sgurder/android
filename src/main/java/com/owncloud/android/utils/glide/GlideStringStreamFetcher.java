@@ -56,7 +56,6 @@ public class GlideStringStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
-        // TODO glide do not create client
         // needed by activity/svg, avatar
         Account mAccount = AccountUtils.getCurrentOwnCloudAccount(MainApp.getAppContext());
         OwnCloudAccount ocAccount = null;

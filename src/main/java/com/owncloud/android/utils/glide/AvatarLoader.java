@@ -35,8 +35,6 @@ public class AvatarLoader implements ModelLoader<GlideAvatar, InputStream> {
     @Nullable
     @Override
     public LoadData<InputStream> buildLoadData(@NonNull GlideAvatar avatar, int width, int height, @NonNull Options options) {
-        // TODO replace key with etag? and type? (avatar, thumbnail, resized image)
-        // TODO pass client to stream fetcher?
         return new LoadData<>(avatar.getKey(), new AvatarFetcher(avatar));
     }
 

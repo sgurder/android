@@ -201,13 +201,19 @@ public class AccountUtils {
         return getServerVersion(account).isSearchSupported();
     }
 
-    public static OwnCloudClient getClientForCurrentAccount(Context context) {
+    public static @Nullable
+    OwnCloudClient getClientForCurrentAccount(Context context) {
         try {
             Account currentAccount = AccountUtils.getCurrentOwnCloudAccount(context);
+
+            if (currentAccount == null) {
+                return null;
+            }
+            
             OwnCloudAccount ocAccount = new OwnCloudAccount(currentAccount, context);
             return OwnCloudClientManagerFactory.getDefaultSingleton().getClientFor(ocAccount, context);
         } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
-            throw new IllegalStateException("Account not found");
+            throw new IllegalStateException("Account not found", e);
         } catch (Exception e) {
             throw new IllegalStateException("Client could not be instantiated", e);
         }

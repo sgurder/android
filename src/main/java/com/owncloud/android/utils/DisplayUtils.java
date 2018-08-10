@@ -68,8 +68,6 @@ import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
 import com.owncloud.android.authentication.AccountUtils;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
-import com.owncloud.android.datamodel.ArbitraryDataProvider;
-import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.datamodel.OCFile;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
@@ -452,21 +450,21 @@ public class DisplayUtils {
      *
      * @param account        the account to be used to connect to server
      */
-    public static void setAvatar(@NonNull Account account, Context context, SimpleTarget<Drawable> target) {
-
-        AccountManager accountManager = AccountManager.get(context);
-        String userId = accountManager.getUserData(account,
-                com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
-
-        setAvatar(account, userId, context, target);
-    }
+//    public static void setAvatar(@NonNull Account account, Context context, SimpleTarget<Drawable> target) {
+//
+//        AccountManager accountManager = AccountManager.get(context);
+//        String userId = accountManager.getUserData(account,
+//                com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
+//
+//        setAvatar(account, userId, context, target);
+//    }
 
     /**
      * fetches and sets the avatar of the given account in the passed callContext
      *
      * @param account        the account to be used to connect to server
      */
-    public static void setAvatar(@NonNull Account account, Context context, ImageView view, float radius) {
+    public static void setAvatar(@NonNull Account account, Context context, Object view, float radius) {
 
         AccountManager accountManager = AccountManager.get(context);
         String userId = accountManager.getUserData(account,
@@ -482,11 +480,45 @@ public class DisplayUtils {
      * @param userId         the userId which avatar should be set
      * @param view           where the image is shown in
      */
-    public static void setAvatar(@NonNull Account account, @NonNull String userId, Context context, ImageView view,
+    public static void setAvatar(@NonNull Account account, @NonNull String userId, Context context, Object view,
                                  float radius) {
-        view.setContentDescription(account.name);
+        Drawable placeholder = context.getResources().getDrawable(R.drawable.ic_user);
+
+        Drawable fallback;
+        try {
+            fallback = TextDrawable.createAvatar(account.name, radius);
+        } catch (NoSuchAlgorithmException e) {
+            fallback = placeholder;
+        }
+
+        // show avatar immediately, might be outdated
+        if (view instanceof ImageView) {
+            ImageView imageView = (ImageView) view;
+            imageView.setContentDescription(account.name);
+
+            GlideApp.with(context)
+                    .asBitmap()
+                    .load(new GlideAvatar(GlideKey.avatar(account, userId, context), null))
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(placeholder)
+                    .error(fallback)
+                    .onlyRetrieveFromCache(true)
+                    .into(imageView);
+        } else {
+            GlideApp.with(context)
+                    .load(new GlideAvatar(GlideKey.avatar(account, userId, context), null))
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(placeholder)
+                    .error(fallback)
+                    .onlyRetrieveFromCache(true)
+                    .into((SimpleTarget<Drawable>) view);
+        }
         
         AsyncTask task = new AsyncTask<Object, Void, InputStream>() {
+
+            GetMethod get = null;
+            ArbitraryDataProvider arbitraryDataProvider;
+            String accountName;
 
             @Override
             protected InputStream doInBackground(Object[] objects) {
@@ -497,22 +529,18 @@ public class DisplayUtils {
 
                 int px = getAvatarDimension(context);
 
-                ArbitraryDataProvider arbitraryDataProvider = new ArbitraryDataProvider(context.getContentResolver());
+                arbitraryDataProvider = new ArbitraryDataProvider(context.getContentResolver());
                 String serverName = account.name.substring(account.name.lastIndexOf('@') + 1, account.name.length());
-                String accountName = userId + "@" + serverName;
+                accountName = userId + "@" + serverName;
                 String eTag = arbitraryDataProvider.getValue(accountName, GlideKey.AVATAR);
                 Log_OC.d(TAG, "glide: old etag: " + eTag);
 
-                GetMethod get = null;
                 try {
                     String uri = client.getBaseUri() + "/index.php/avatar/" + Uri.encode(userId) + "/" + px;
                     Log_OC.d("Avatar", "URI: " + uri);
                     get = new GetMethod(uri);
 
-                    // only use eTag if available and corresponding avatar is still there 
-                    // (might be deleted from cache)
-//                    if (!eTag.isEmpty() && getBitmapFromDiskCache(avatarKey) != null) {
-                    // TODO check if in cache
+                    // only use eTag if available 
                     if (!eTag.isEmpty()) {
                         get.setRequestHeader("If-None-Match", eTag);
                     }
@@ -542,7 +570,9 @@ public class DisplayUtils {
                     }
                 } catch (Exception e) {
                     // do nothing, fallback in glide
-                    //  get.releaseConnection(); // TODO glide this must not be released?
+                    if (get != null) {
+                        get.releaseConnection();
+                    }
                 }
 
                 return inputStream;
@@ -560,63 +590,33 @@ public class DisplayUtils {
                 }
 
                 try {
-                    GlideApp.with(context)
-                            .asBitmap()
-                            .load(new GlideAvatar(GlideKey.avatar(account, userId, context), inputStream))
-                            .apply(RequestOptions.circleCropTransform())
-                            .placeholder(placeholder)
-                            .error(fallback)
-                            .onlyRetrieveFromCache(inputStream == null)
-                            .into(view);
+                    if (view instanceof ImageView) {
+                        ImageView imageView = (ImageView) view;
+                        imageView.setContentDescription(account.name);
+
+                        GlideApp.with(context)
+                                .asBitmap()
+                                .load(new GlideAvatar(GlideKey.avatar(account, userId, context), inputStream))
+                                .apply(RequestOptions.circleCropTransform())
+                                .placeholder(placeholder)
+                                .error(fallback)
+                                .onlyRetrieveFromCache(inputStream == null)
+                                .into(imageView);
+                    } else {
+                        GlideApp.with(context)
+                                .load(new GlideAvatar(GlideKey.avatar(account, userId, context), inputStream))
+                                .apply(RequestOptions.circleCropTransform())
+                                .placeholder(placeholder)
+                                .error(fallback)
+                                .onlyRetrieveFromCache(inputStream == null)
+                                .into((SimpleTarget<Drawable>) view);
+                    }
+                    
                 } catch (Exception e) {
+                    Log_OC.e(TAG, "Avatar generation failed", e);
+                    // reset eTag
+                    arbitraryDataProvider.storeOrUpdateKeyValue(accountName, GlideKey.AVATAR, "");
                     // context may be null
-                }
-            }
-        };
-
-        task.execute();
-    }
-
-    /**
-     * fetches and sets the avatar of the given account in the passed callContext
-     *
-     * @param account        the account to be used to connect to server
-     * @param userId         the userId which avatar should be set
-     * @param target         where the image is shown in
-     */
-    // TODO combine with better approach (eTag)
-    public static void setAvatar(@NonNull Account account, @NonNull String userId, Context context,
-                                 SimpleTarget<Drawable> target) {
-        AsyncTask task = new AsyncTask() {
-            GlideContainer container;
-
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                // we need to create client here, as different servers can be used
-                OwnCloudClient client = AccountUtils.getClientForAccount(account, context);
-
-                int px = getAvatarDimension(context);
-                container = new GlideContainer();
-                container.url = client.getBaseUri() + "/index.php/avatar/" + Uri.encode(userId) + "/" + px;
-                container.client = client;
-                container.key = GlideKey.avatar(account, userId, context);
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Object o) {
-                int placeholder = R.drawable.ic_user;
-
-                try {
-                    GlideApp.with(context)
-                            .load(container)
-                            .placeholder(placeholder)
-                            .error(R.drawable.ic_list_empty_error)
-                            .apply(RequestOptions.circleCropTransform())
-                            .into(target);
-                } catch (Exception e) {
-                    // TODO glide
                 }
             }
         };
@@ -628,7 +628,6 @@ public class DisplayUtils {
                                     int error) {
         try {
             if (iconUrl.endsWith(".svg")) {
-                // TODO glide exception
                 downloadSVG(iconUrl, placeholder, error, imageView, context);
             } else {
                 downloadPNGIcon(context, iconUrl, imageView, placeholder);
@@ -659,11 +658,10 @@ public class DisplayUtils {
                 .into(imageView);
     }
 
-    // TODO glide unify with ImageView
-    public static void downloadSVG(String url, int placeholder, int error, SimpleTarget<Drawable> imageView,
-                                   Context context) {
+    private static void downloadSVG(String url, int placeholder, int error, SimpleTarget<Drawable> imageView,
+                                    Context context) {
         GlideApp.with(context)
-                .as(PictureDrawable.class) // TODO glide needed?
+                .as(PictureDrawable.class)
                 .load(url)
                 .placeholder(placeholder)
                 .error(error)
@@ -695,8 +693,6 @@ public class DisplayUtils {
     }
 
     public static void downloadThumbnail(OCFile file, ImageView view, OwnCloudClient client, Context context) {
-        // TODO glide: first try to extract thumbnail from resized image
-        
         GlideContainer container = new GlideContainer();
 
         int placeholder = MimeTypeUtil.isVideo(file) ? R.drawable.file_movie : R.drawable.file_image;
@@ -715,8 +711,6 @@ public class DisplayUtils {
     }
 
     public static void downloadActivityThumbnail(OCFile file, ImageView view, OwnCloudClient client, Context context) {
-        // TODO glide: first try to extract thumbnail from resized image
-
         GlideContainer container = new GlideContainer();
 
         int placeholder = MimeTypeUtil.isVideo(file) ? R.drawable.file_movie : R.drawable.file_image;
@@ -777,23 +771,6 @@ public class DisplayUtils {
         return client.getBaseUri() + "/index.php/apps/files_trashbin/preview?fileId=" +
                 file.getLocalId() + "&x=" + size + "&y=" + size;
     }
-
-//    public static void showResizedImage(String uri, Drawable placeholder, Drawable error, ImageView view, OwnCloudClient client,
-//                                     Key key, Context context) {
-//        
-//        
-//        GlideContainer container = new GlideContainer();
-//
-//        container.url = uri;
-//        container.key = key;
-//        container.client = client;
-//
-//        GlideApp.with(context)
-//                .load(container)
-//                .placeholder(placeholder)
-//                .error(error)
-//                .into(view);
-//    }
 
     public static void downloadImage(String uri, int placeholder, int error, SimpleTarget<Drawable> target, Key key,
                                      Context context) {

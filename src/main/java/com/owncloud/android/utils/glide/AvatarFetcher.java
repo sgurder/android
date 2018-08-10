@@ -9,7 +9,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import java.io.InputStream;
 
 public class AvatarFetcher implements DataFetcher<InputStream> {
-    private final static String TAG = AvatarFetcher.class.getSimpleName();
     private GlideAvatar avatar;
 
     public AvatarFetcher(GlideAvatar avatar) {

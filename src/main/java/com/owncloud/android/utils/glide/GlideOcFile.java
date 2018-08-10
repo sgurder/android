@@ -4,7 +4,7 @@ import com.owncloud.android.datamodel.OCFile;
 
 public class GlideOcFile {
     private OCFile file;
-    private GlideOCFileType type; // todo glide needed?
+    private GlideOCFileType type;
     private String path = "";
 
     public GlideOcFile(OCFile file, GlideOCFileType type) {

@@ -68,6 +68,7 @@ import com.owncloud.android.lib.common.UserInfo;
 import com.owncloud.android.lib.common.operations.RemoteOperation;
 import com.owncloud.android.lib.common.operations.RemoteOperationResult;
 import com.owncloud.android.lib.common.utils.Log_OC;
+import com.owncloud.android.lib.resources.status.OwnCloudVersion;
 import com.owncloud.android.lib.resources.users.GetRemoteUserInfoOperation;
 import com.owncloud.android.ui.events.TokenPushEvent;
 import com.owncloud.android.utils.DisplayUtils;
@@ -223,9 +224,17 @@ public class UserInfoActivity extends FileActivity {
                 ImageView backgroundImageView = appBar.findViewById(R.id.drawer_header_background);
 
                 String background = getStorageManager().getCapability(account.name).getServerBackground();
-                int primaryColor = ThemeUtils.primaryColor(getAccount(), false, this);
+                int primaryColor = ThemeUtils.primaryColor(account, false, this);
 
                 if (URLUtil.isValidUrl(background)) {
+                    Drawable backgroundResource;
+                    OwnCloudVersion ownCloudVersion = AccountUtils.getServerVersion(account);
+                    if (ownCloudVersion.compareTo(OwnCloudVersion.nextcloud_13) >= 0) {
+                        backgroundResource = getResources().getDrawable(R.drawable.background_nc13);
+                    } else {
+                        backgroundResource = getResources().getDrawable(R.drawable.background);
+                    }
+                    
                     // background image
                     SimpleTarget<Drawable> target = new SimpleTarget<Drawable>() {
                         @Override
@@ -239,7 +248,7 @@ public class UserInfoActivity extends FileActivity {
                         @Override
                         public void onLoadFailed(@Nullable Drawable errorDrawable) {
                             Drawable[] drawables = {new ColorDrawable(primaryColor),
-                                    getResources().getDrawable(R.drawable.background)};
+                                    backgroundResource};
                             LayerDrawable layerDrawable = new LayerDrawable(drawables);
                             backgroundImageView.setImageDrawable(layerDrawable);
                         }
