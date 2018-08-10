@@ -30,7 +30,6 @@ import android.support.annotation.Nullable;
 
 import com.owncloud.android.MainApp;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
-import com.owncloud.android.datamodel.FileDataStorageManager;
 import com.owncloud.android.lib.common.OwnCloudAccount;
 import com.owncloud.android.lib.common.OwnCloudClient;
 import com.owncloud.android.lib.common.OwnCloudClientManagerFactory;
@@ -210,7 +209,7 @@ public class AccountUtils {
         } catch (com.owncloud.android.lib.common.accounts.AccountUtils.AccountNotFoundException e) {
             throw new IllegalStateException("Account not found");
         } catch (Exception e) {
-            throw new IllegalStateException("Client could not be instantiated");
+            throw new IllegalStateException("Client could not be instantiated", e);
         }
     }
 
