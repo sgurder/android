@@ -317,7 +317,6 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         // not GONE; the alignment changes; ugly way to keep it
         view.findViewById(R.id.localFileIndicator).setVisibility(View.INVISIBLE);
-        view.findViewById(R.id.keptOfflineIcon).setVisibility(View.GONE);
         view.findViewById(R.id.favorite_action).setVisibility(View.GONE);
 
         view.findViewById(R.id.sharedIcon).setVisibility(View.GONE);
@@ -514,7 +513,6 @@ public class LocalFileListAdapter extends RecyclerView.Adapter<RecyclerView.View
             itemView.findViewById(R.id.overflow_menu).setVisibility(View.GONE);
             itemView.findViewById(R.id.sharedIcon).setVisibility(View.GONE);
             itemView.findViewById(R.id.favorite_action).setVisibility(View.GONE);
-            itemView.findViewById(R.id.keptOfflineIcon).setVisibility(View.GONE);
             itemView.findViewById(R.id.localFileIndicator).setVisibility(View.GONE);
         }
     }

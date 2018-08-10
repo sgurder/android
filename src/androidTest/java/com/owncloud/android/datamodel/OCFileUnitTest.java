@@ -84,14 +84,12 @@ public class OCFileUnitTest {
         mFile.setModificationTimestampAtLastSyncForData(MODIFICATION_TIMESTAMP_AT_LAST_SYNC_FOR_DATA);
         mFile.setLastSyncDateForProperties(LAST_SYNC_DATE_FOR_PROPERTIES);
         mFile.setLastSyncDateForData(LAST_SYNC_DATE_FOR_DATA);
-        mFile.setAvailableOffline(true);
         mFile.setEtag(ETAG);
         mFile.setShareViaLink(true);
         mFile.setShareWithSharee(true);
         mFile.setPublicLink(PUBLIC_LINK);
         mFile.setPermissions(PERMISSIONS);
         mFile.setRemoteId(REMOTE_ID);
-        mFile.setNeedsUpdateThumbnail(true);
         mFile.setDownloading(true);
         mFile.setEtagInConflict(ETAG_IN_CONFLICT);
 
@@ -119,7 +117,6 @@ public class OCFileUnitTest {
         );
         assertThat(fileReadFromParcel.getLastSyncDateForProperties(), is(LAST_SYNC_DATE_FOR_PROPERTIES));
         assertThat(fileReadFromParcel.getLastSyncDateForData(), is(LAST_SYNC_DATE_FOR_DATA));
-        assertThat(fileReadFromParcel.isAvailableOffline(), is(true));
         assertThat(fileReadFromParcel.getEtag(), is(ETAG));
         assertThat(fileReadFromParcel.getEtagOnServer(), is(ETAG));
         assertThat(fileReadFromParcel.isSharedViaLink(), is(true));

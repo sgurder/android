@@ -730,7 +730,6 @@ public class FileContentProvider extends ContentProvider {
                 + ProviderTableMeta.FILE_STORAGE_PATH + TEXT
                 + ProviderTableMeta.FILE_ACCOUNT_OWNER + TEXT
                 + ProviderTableMeta.FILE_LAST_SYNC_DATE + INTEGER
-                + ProviderTableMeta.FILE_KEEP_IN_SYNC + INTEGER
                 + ProviderTableMeta.FILE_LAST_SYNC_DATE_FOR_DATA + INTEGER
                 + ProviderTableMeta.FILE_MODIFIED_AT_LAST_SYNC_FOR_DATA + INTEGER
                 + ProviderTableMeta.FILE_ETAG + TEXT

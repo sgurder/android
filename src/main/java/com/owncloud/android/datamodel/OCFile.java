@@ -77,7 +77,6 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
     private boolean mNeedsUpdating;
     private long mLastSyncDateForProperties;
     private long mLastSyncDateForData;
-    private boolean mAvailableOffline;
 
     private String mEtag;
     private String mEtagOnServer;
@@ -150,7 +149,6 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
         mLocalPath = source.readString();
         mMimeType = source.readString();
         mNeedsUpdating = source.readInt() == 0;
-        mAvailableOffline = source.readInt() == 1;
         mLastSyncDateForProperties = source.readLong();
         mLastSyncDateForData = source.readLong();
         mEtag = source.readString();
@@ -181,7 +179,6 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
         dest.writeString(mLocalPath);
         dest.writeString(mMimeType);
         dest.writeInt(mNeedsUpdating ? 1 : 0);
-        dest.writeInt(mAvailableOffline ? 1 : 0);
         dest.writeLong(mLastSyncDateForProperties);
         dest.writeLong(mLastSyncDateForData);
         dest.writeString(mEtag);
@@ -512,7 +509,6 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
         mModifiedTimestampAtLastSyncForData = 0;
         mLastSyncDateForProperties = 0;
         mLastSyncDateForData = 0;
-        mAvailableOffline = false;
         mNeedsUpdating = false;
         mEtag = null;
         mEtagOnServer = null;
@@ -619,14 +615,6 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
         mLastSyncDateForData = lastSyncDate;
     }
 
-    public void setAvailableOffline(boolean availableOffline) {
-        mAvailableOffline = availableOffline;
-    }
-
-    public boolean isAvailableOffline() {
-        return mAvailableOffline;
-    }
-
     @Override
     public int describeContents() {
         return super.hashCode();
@@ -666,9 +654,8 @@ public class OCFile implements Parcelable, Comparable<OCFile>, ServerFileInterfa
     @Override
     public String toString() {
         String asString = "[id=%s, name=%s, mime=%s, downloaded=%s, local=%s, remote=%s, " +
-                "parentId=%s, availableOffline=%s etag=%s favourite=%s]";
-        return String.format(asString, mId, getFileName(), mMimeType, isDown(),
-                mLocalPath, mRemotePath, mParentId, mAvailableOffline,
+                "parentId=%s, etag=%s, favourite=%s]";
+        return String.format(asString, mId, getFileName(), mMimeType, isDown(), mLocalPath, mRemotePath, mParentId, 
                 mEtag, mIsFavorite);
     }
 

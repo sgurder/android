@@ -194,7 +194,6 @@ public class RefreshFolderOperation extends RemoteOperation {
             if (mRemoteFolderChanged) {
                 result = fetchAndSyncRemoteFolder(client);
             } else {
-                fetchKeptInSyncFilesToSyncFromLocalData();
                 mChildren = mStorageManager.getFolderContent(mLocalFolder, false);
             }
 
@@ -395,14 +394,6 @@ public class RefreshFolderOperation extends RemoteOperation {
             // check and fix, if needed, local storage path
             FileStorageUtils.searchForLocalFileInDefaultPath(updatedFile, mAccount);
 
-            // prepare content synchronization for kept-in-sync files
-            if (updatedFile.isAvailableOffline()) {
-                SynchronizeFileOperation operation = new SynchronizeFileOperation(localFile, remoteFile, mAccount, true,
-                        mContext);
-
-                mFilesToSyncContents.add(operation);
-            }
-
             // update file name for encrypted files
             if (metadata != null) {
                 updateFileNameForEncryptedFile(metadata, updatedFile);
@@ -453,7 +444,6 @@ public class RefreshFolderOperation extends RemoteOperation {
     private void setLocalFileDataOnUpdatedFile(OCFile remoteFile, OCFile localFile, OCFile updatedFile, boolean remoteFolderChanged) {
         if (localFile != null) {
             updatedFile.setFileId(localFile.getFileId());
-            updatedFile.setAvailableOffline(localFile.isAvailableOffline());
             updatedFile.setLastSyncDateForData(localFile.getLastSyncDateForData());
             updatedFile.setModificationTimestampAtLastSyncForData(
                     localFile.getModificationTimestampAtLastSyncForData()
@@ -586,24 +576,5 @@ public class RefreshFolderOperation extends RemoteOperation {
 
         intent.setPackage(mContext.getPackageName());
         mContext.sendStickyBroadcast(intent);
-        //LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
-
-
-    private void fetchKeptInSyncFilesToSyncFromLocalData() {
-        List<OCFile> children = mStorageManager.getFolderContent(mLocalFolder, false);
-        for (OCFile child : children) {
-            if (!child.isFolder() && child.isAvailableOffline() && !child.isInConflict()) {
-                SynchronizeFileOperation operation = new SynchronizeFileOperation(
-                        child,
-                        child,  // cheating with the remote file to get an update to server; to refactor
-                        mAccount,
-                        true,
-                        mContext
-                );
-                mFilesToSyncContents.add(operation);
-            }
-        }
-    }
-
 }

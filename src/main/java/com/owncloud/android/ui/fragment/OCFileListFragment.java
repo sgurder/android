@@ -944,14 +944,6 @@ public class OCFileListFragment extends ExtendedListFragment implements
                 ((FileDisplayActivity) mContainerActivity).cancelTransference(checkedFiles);
                 return true;
             }
-            case R.id.action_keep_files_offline: {
-                mContainerActivity.getFileOperationsHelper().toggleOfflineFiles(checkedFiles, true);
-                return true;
-            }
-            case R.id.action_unset_keep_files_offline: {
-                mContainerActivity.getFileOperationsHelper().toggleOfflineFiles(checkedFiles, false);
-                return true;
-            }
             case R.id.action_favorite: {
                 mContainerActivity.getFileOperationsHelper().toggleFavoriteFiles(checkedFiles, true);
                 return true;
@@ -1304,6 +1296,10 @@ public class OCFileListFragment extends ExtendedListFragment implements
 
         String userId = mAccountMgr.getUserData(currentAccount,
                 com.owncloud.android.lib.common.accounts.AccountUtils.Constants.KEY_USER_ID);
+
+        if (client == null) {
+            client = AccountUtils.getClientForCurrentAccount(getContext());
+        }
 
         if (TextUtils.isEmpty(userId)) {
             userId = client.getCredentials().getUsername();
